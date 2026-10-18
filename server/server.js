@@ -6,8 +6,6 @@ import mongoose from "mongoose";
 import taskRoutes from "./routes/taskRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
-
-
 dotenv.config();
 
 const app = express();
@@ -20,8 +18,41 @@ app.use(
 );
 
 app.use(express.json());
-app.use("/api/auth", authRoutes);
-app.use("/api/tasks", taskRoutes);
+
+let connectionPromise;
+
+async function connectToDatabase() {
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+
+  if (!process.env.MONGODB_URI) {
+    throw new Error("MONGODB_URI environment variable is missing");
+  }
+
+  if (!connectionPromise) {
+    connectionPromise = mongoose.connect(process.env.MONGODB_URI).catch((error) => {
+      connectionPromise = null;
+      throw error;
+    });
+  }
+
+  await connectionPromise;
+}
+
+async function ensureDatabase(req, res, next) {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    console.error("MongoDB connection failed:", error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Database connection failed",
+    });
+  }
+}
 
 app.get("/", (req, res) => {
   res.json({
@@ -38,9 +69,15 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+app.use("/api", ensureDatabase);
+app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes);
+
+export default app;
+
 async function startServer() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    await connectToDatabase();
 
     console.log("MongoDB connected successfully!");
 
@@ -48,9 +85,11 @@ async function startServer() {
       console.log(`TaskFlow backend running at http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("MongoDB connection failed:", error.message);
+    console.error("Server startup failed:", error.message);
     process.exit(1);
   }
 }
 
-startServer();
+if (process.env.VERCEL !== "1") {
+  startServer();
+}
