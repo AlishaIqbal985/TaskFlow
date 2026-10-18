@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TaskFlow API Test</title>
+</head>
+<body>
+  <h2>TaskFlow Task API Test</h2>
+  <button id="createTask">Create Test Task</button>
+  <pre id="result">Click the button to create a task.</pre>
+
+  <script type="module">
+    import api from "./src/services/api.js";
+
+    const result = document.getElementById("result");
+    const button = document.getElementById("createTask");
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      result.textContent = "Creating task...";
+
+      try {
+        const response = await api.post("/api/tasks", {
+          title: "My First Database Task",
+          description: "Testing MongoDB integration",
+        });
+
+        result.textContent = JSON.stringify(response.data, null, 2);
+      } catch (error) {
+        result.textContent = JSON.stringify(
+          error.response?.data || { message: error.message },
+          null,
+          2
+        );
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
