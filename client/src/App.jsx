@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react'
 import Sidebar from './components/Sidebar.jsx'
 import TaskStats from './components/TaskStats.jsx'
@@ -106,14 +105,17 @@ const helpArticles = [
     answer: 'Open the profile menu in the top-right corner, select Settings, update your information, and save your changes.',
   },
   {
-    question: 'Why are my tasks saved in this browser?',
-    answer: 'This version uses browser localStorage. Data is not yet connected to MongoDB and may not appear in another browser or device.',
-  },
+  question: 'Where are my tasks saved?',
+  answer: 'Your tasks are saved through the TaskFlow backend in MongoDB and are associated with your account. You can access your tasks after logging in, provided the backend and database are available.',
+},
   {
     question: 'How do notifications work?',
     answer: 'The Notifications page checks your tasks for overdue deadlines, upcoming due dates, and incomplete tasks. It does not send push notifications.',
   },
 ]
+
+const selectClass =
+  'block h-12 w-full min-w-0 max-w-full box-border rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100 sm:px-4'
 
 function App() {
   const [tasks, setTasks] = useState([])
@@ -417,9 +419,12 @@ useEffect(() => {
       return null
     }
 
-    const duplicate = tasks.some(
-      (task) => task.title.trim().toLowerCase() === title.toLowerCase(),
-    )
+    
+const duplicate = tasks.some(
+  (task) =>
+    task.title.trim().toLowerCase() === title.toLowerCase(),
+)
+
 
     if (duplicate) {
       showModal({
@@ -635,10 +640,12 @@ function editTask(id, newTitle, newCategory, newPriority, newDueDate) {
   }
 
   const duplicate = tasks.some(
-    (task) =>
-      task.id !== id &&
-      task.title.trim().toLowerCase() === title.toLowerCase(),
-  );
+  (task) =>
+    task.id !== id &&
+    task.title.trim().toLowerCase() === title.toLowerCase() &&
+    (task.category || '').toLowerCase() ===
+      (newCategory || '').toLowerCase(),
+);
 
   if (duplicate) {
     showModal({
@@ -923,7 +930,23 @@ function handleLogout() {
       .includes(helpSearch.trim().toLowerCase()),
   )
 
- if (!authUser) {
+ if (isCheckingAuth) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-lg">
+        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-teal-100 border-t-teal-600" />
+        <h2 className="mt-5 text-lg font-semibold text-slate-800">
+          Checking your session
+        </h2>
+        <p className="mt-2 text-sm text-slate-500">
+          Please wait while TaskFlow verifies your account.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+if (!authUser) {
   return <Auth onAuthenticated={handleAuthenticated} />
 }
 
@@ -1036,7 +1059,9 @@ function handleLogout() {
       )}
 
       <main
-        className={`min-w-0 flex-1 p-4 pt-5 md:p-8 lg:p-10 ${
+        
+className={`min-w-0 w-full flex-1 p-3 pt-4 sm:p-4 sm:pt-5 md:p-8 lg:p-10 ${
+
           isLoggedOut ? 'flex items-center justify-center' : ''
         }`}
       >
@@ -1060,7 +1085,9 @@ function handleLogout() {
         ) : (
           <>
             <header className="mb-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-              <div className="flex items-center justify-between gap-4">
+              
+<div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+
                 <div className="flex min-w-0 items-center gap-3">
                   <button
                     type="button"
@@ -1076,7 +1103,9 @@ function handleLogout() {
                     <p className="text-xs font-semibold tracking-wider text-teal-700 sm:text-sm">
                       YOUR WORKSPACE
                     </p>
-                    <h2 className="mt-1 truncate text-2xl font-bold tracking-tight sm:text-3xl">
+                    
+<h2 className="mt-1 truncate text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
+
                       {pageTitle}
                     </h2>
                     <p className="mt-1 hidden text-sm text-slate-500 sm:block">
@@ -1090,7 +1119,9 @@ function handleLogout() {
                     type="button"
                     onClick={openNotifications}
                     aria-label="Open notifications"
-                    className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-xl transition hover:bg-slate-100"
+                    
+className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 transition hover:bg-slate-100 sm:h-11 sm:w-11"
+
                   >
                     <Bell size={20} strokeWidth={1.8} aria-hidden="true" />
 
@@ -1106,7 +1137,9 @@ function handleLogout() {
                     onClick={() => setIsProfileMenuOpen((open) => !open)}
                     aria-label="Open profile menu"
                     aria-expanded={isProfileMenuOpen}
-                    className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-xl font-bold text-teal-800 ring-4 ring-teal-50 transition hover:scale-105"
+                    
+className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-lg font-bold text-teal-800 ring-2 ring-teal-50 transition hover:scale-105 sm:h-12 sm:w-12 sm:text-xl sm:ring-4"
+
                   >
                     {profile.avatar ? (
                       profile.avatar.startsWith('data:image/') ? (
@@ -1120,7 +1153,7 @@ function handleLogout() {
                   </button>
 
                   {isProfileMenuOpen && (
-                    <div className="taskflow-menu-animation absolute right-0 top-full z-40 mt-3 w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-2xl">
+                    <div className="taskflow-menu-animation absolute right-0 top-full z-40 mt-3 w-72 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-2xl">
                       <div className="bg-gradient-to-r from-teal-700 to-emerald-600 p-4 text-white">
                         <div className="flex items-center gap-3">
                           <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white/60 bg-white/20 text-xl font-bold">
@@ -1252,7 +1285,9 @@ function handleLogout() {
               )}
 
             {activeView === 'tasks' || activeView === 'completed' ? (
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
+              
+<section className="box-border w-full min-w-0 max-w-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 md:p-7">
+
                 <div className="mb-6">
                   <h3 className="text-xl font-bold">
                     {activeView === 'completed' ? 'Completed Tasks' : 'Task List'}
@@ -1296,28 +1331,38 @@ function handleLogout() {
                   </div>
                 )}
 
-                <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-                  <label htmlFor="task-sort" className="text-sm font-medium">
-                    Sort tasks by
-                  </label>
-                  <select
-                    id="task-sort"
-                    value={sortBy}
-                    onChange={(event) => setSortBy(event.target.value)}
-                    className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
-                  >
-                    <option value="default">Default order</option>
-                    <option value="priority">Priority: High to Low</option>
-                    <option value="dueDate">Due Date: Earliest First</option>
-                    <option value="newest">Newest First</option>
-                    <option value="alphabetical">Alphabetical: A to Z</option>
-                  </select>
-                </div>
+               
+
+<div className="mb-5 flex w-full min-w-0 max-w-full flex-col gap-2 sm:flex-row sm:items-center">
+  <label
+    htmlFor="task-sort"
+    className="block min-w-0 text-sm font-medium"
+  >
+    Sort tasks by
+  </label>
+
+ <select
+  id="task-sort"
+  value={sortBy}
+  onChange={(event) => setSortBy(event.target.value)}
+  className={selectClass}
+>
+  <option value="default">Default order</option>
+  <option value="priority">Priority: High to Low</option>
+  <option value="dueDate">Due Date: Earliest First</option>
+  <option value="newest">Newest First</option>
+  <option value="alphabetical">Alphabetical: A to Z</option>
+</select>
+</div>
+
+
 
                 {activeView === 'tasks' && (
                   <form
                     onSubmit={addTask}
-                    className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+                    
+className="mb-6 grid w-full min-w-0 max-w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
+
                   >
                     <div className="min-w-0">
                       <label htmlFor="new-task" className="mb-2 block text-sm font-medium">
@@ -1331,51 +1376,51 @@ function handleLogout() {
                         maxLength={100}
                         placeholder="e.g. Complete React project"
                         aria-describedby="task-name-help"
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                        className="block h-12 w-full min-w-0 max-w-full box-border rounded-xl border border-slate-300 px-3 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 sm:px-4"
                       />
                       <p id="task-name-help" className="mt-2 text-xs text-slate-500">
                         Required. Maximum 100 characters.
                       </p>
                     </div>
 
-                    {showCategoryField && (
-                      <div>
-                        <label htmlFor="new-category" className="mb-2 block text-sm font-medium">
-                          Category (optional)
-                        </label>
-                        <select
-                          id="new-category"
-                          value={newCategory}
-                          onChange={(event) => setNewCategory(event.target.value)}
-                          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
-                        >
-                          <option value="">Select category</option>
-                          <option value="Personal">Personal</option>
-                          <option value="Learning">Learning</option>
-                          <option value="Work">Work</option>
-                          <option value="Development">Development</option>
-                        </select>
-                      </div>
-                    )}
+                 {showCategoryField && (
+  <div className="min-w-0">
+    <label htmlFor="new-category" className="mb-2 block text-sm font-medium">
+      Category (optional)
+    </label>
+    <select
+      id="new-category"
+      value={newCategory}
+      onChange={(event) => setNewCategory(event.target.value)}
+      className={selectClass}
+    >
+      <option value="">Select category</option>
+      <option value="Personal">Personal</option>
+      <option value="Learning">Learning</option>
+      <option value="Work">Work</option>
+      <option value="Development">Development</option>
+    </select>
+  </div>
+)}
 
                     {showPriorityField && (
-                      <div>
-                        <label htmlFor="new-priority" className="mb-2 block text-sm font-medium">
-                          Priority (optional)
-                        </label>
-                        <select
-                          id="new-priority"
-                          value={newPriority}
-                          onChange={(event) => setNewPriority(event.target.value)}
-                          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
-                        >
-                          <option value="">Select priority</option>
-                          <option value="Low">Low</option>
-                          <option value="Medium">Medium</option>
-                          <option value="High">High</option>
-                        </select>
-                      </div>
-                    )}
+  <div className="min-w-0">
+    <label htmlFor="new-priority" className="mb-2 block text-sm font-medium">
+      Priority (optional)
+    </label>
+    <select
+      id="new-priority"
+      value={newPriority}
+      onChange={(event) => setNewPriority(event.target.value)}
+      className={selectClass}
+    >
+      <option value="">Select priority</option>
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
+    </select>
+  </div>
+)}
 
                     {showDueDateField && (
                       <DueDatePicker value={newDueDate} onChange={setNewDueDate} />
@@ -1712,7 +1757,7 @@ function handleLogout() {
                       <div>
                         <h4 className="font-bold">Your data, explained</h4>
                         <p className="mt-2 text-sm leading-6 text-slate-500">
-                          Your current tasks and profile are stored in this browser. Database sync and account security will be added separately.
+                          Your tasks are stored in MongoDB through the backend and linked to your account. Your profile preferences, such as theme and avatar, are currently stored in this browser.
                         </p>
                       </div>
                     </div>
@@ -1919,7 +1964,7 @@ function handleLogout() {
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
                   <h3 className="text-xl font-bold">Task data</h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    Your tasks are currently stored in this browser using localStorage.
+                    Your tasks are stored in MongoDB through your TaskFlow account.
                   </p>
 
                   <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -1934,7 +1979,7 @@ function handleLogout() {
                   </div>
 
                   <p className="mt-4 text-sm leading-6 text-slate-500">
-                    Clearing browser site data may remove saved tasks and profile settings. Clear All Tasks only removes tasks, not your profile.
+                    Your tasks are stored in the database, while profile preferences are stored in this browser. Clear All Tasks permanently deletes your account's tasks, but does not delete your account or profile preferences.
                   </p>
 
                   <button
@@ -1958,12 +2003,14 @@ function handleLogout() {
         <FeedbackModal modal={modal} onClose={closeModal} />
 
         {showOptionalFieldsModal && !isLoggedOut && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+          <div className="fixed inset-0 z-[90] flex items-center justify-center overflow-y-auto bg-slate-900/50 p-3 sm:p-4">
             <section
               role="dialog"
               aria-modal="true"
               aria-labelledby="optional-fields-title"
-              className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+              
+className="my-auto w-full max-w-md rounded-2xl bg-white p-4 shadow-2xl sm:p-6"
+
             >
               <h2 id="optional-fields-title" className="text-xl font-bold text-slate-900">
                 Add More Details?
