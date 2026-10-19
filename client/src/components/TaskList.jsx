@@ -11,9 +11,13 @@ import {
   Palette,
   ShoppingCart,
   UsersRound,
+  Pencil,
+  Trash2,
+  Save,
+  X,
+  CalendarClock,
 } from 'lucide-react'
 import { format, isBefore, startOfDay } from 'date-fns'
-
 
 function getTaskIcon(task) {
   const title = (task.title || '').toLowerCase()
@@ -135,230 +139,294 @@ function TaskList({ tasks, toggleTask, deleteTask, editTask, showModal }) {
   function formatDueDate(date) {
     if (!date) return ''
 
-    try {
-      return format(new Date(`${date}T12:00:00`), 'dd MMM yyyy')
-    } catch {
+    const parsedDate = new Date(`${date}T12:00:00`)
+
+    if (Number.isNaN(parsedDate.getTime())) {
       return date
     }
+
+    return format(parsedDate, 'dd MMM yyyy')
   }
 
   function isTaskOverdue(task) {
     if (!task.dueDate || task.completed) return false
 
     const dueDate = new Date(`${task.dueDate}T12:00:00`)
+
+    if (Number.isNaN(dueDate.getTime())) return false
+
     return isBefore(dueDate, startOfDay(new Date()))
   }
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3">
       {tasks.length === 0 ? (
-        <p className="rounded-xl bg-slate-50 p-6 text-center text-slate-500">
-          No tasks found. Add a task or change your search.
-        </p>
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center sm:px-6">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-100 text-teal-700">
+            <ListTodo size={24} />
+          </span>
+
+          <p className="mt-3 font-semibold text-slate-700">
+            No tasks found
+          </p>
+
+          <p className="mt-1 text-sm text-slate-500">
+            Add a task or change your search and filters.
+          </p>
+        </div>
       ) : (
         tasks.map((task, index) => {
           const overdue = isTaskOverdue(task)
           const { Icon: TaskIcon, style: taskIconStyle } = getTaskIcon(task)
+          const isEditing = editingId === task.id
 
           return (
-            <div
+            <article
               key={task.id}
-              className="flex flex-wrap items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 transition duration-200 hover:border-teal-200 hover:shadow-sm sm:items-center"
+              className={`min-w-0 rounded-2xl border bg-white p-3 transition duration-200 hover:border-teal-200 hover:shadow-sm sm:p-4 ${
+                task.completed
+                  ? 'border-slate-200'
+                  : 'border-slate-200'
+              }`}
             >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-semibold text-teal-700">
-                {index + 1}
-              </span>
+              <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
+                <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-teal-50 text-xs font-bold text-teal-700 sm:h-8 sm:w-8 sm:text-sm">
+                  {index + 1}
+                </span>
 
-              <input
-                type="checkbox"
-                checked={task.completed}
-                onChange={() => toggleTask(task.id)}
-                aria-label={`Mark ${task.title} as completed`}
-                className="mt-1 h-5 w-5 shrink-0 accent-teal-600 sm:mt-0"
-              />
+                <input
+                  type="checkbox"
+                  checked={Boolean(task.completed)}
+                  onChange={() => toggleTask(task.id)}
+                  aria-label={`Mark ${task.title} as completed`}
+                  className="mt-2 h-5 w-5 shrink-0 cursor-pointer accent-teal-600"
+                />
 
-              <div className="flex min-w-0 flex-1 flex-col gap-3">
-                {editingId === task.id ? (
-                  <>
-                    <input
-                      type="text"
-                      value={editedTitle}
-                      maxLength={100}
-                      onChange={(event) =>
-                        setEditedTitle(event.target.value)
-                      }
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') saveEdit(task.id)
-                        if (event.key === 'Escape') cancelEdit()
-                      }}
-                      aria-label="Edit task title"
-                      autoFocus
-                      className="w-full min-w-0 rounded-lg border border-teal-500 px-3 py-2 text-slate-800 outline-none focus:ring-2 focus:ring-teal-100"
-                    />
+                <div className="min-w-0 flex-1">
+                  {isEditing ? (
+                    <div className="space-y-3">
+                      <div>
+                        <label
+                          htmlFor={`task-title-${task.id}`}
+                          className="mb-1.5 block text-xs font-semibold text-slate-600"
+                        >
+                          Task name
+                        </label>
 
-                    <div>
-                      <label className="mb-1 block text-xs font-medium text-slate-600">
-                        Category (optional)
-                      </label>
+                        <input
+                          id={`task-title-${task.id}`}
+                          type="text"
+                          value={editedTitle}
+                          maxLength={100}
+                          onChange={(event) =>
+                            setEditedTitle(event.target.value)
+                          }
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') saveEdit(task.id)
+                            if (event.key === 'Escape') cancelEdit()
+                          }}
+                          autoFocus
+                          className="w-full min-w-0 rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                        />
 
-                      <select
-                        value={editedCategory}
-                        onChange={(event) =>
-                          setEditedCategory(event.target.value)
-                        }
-                        aria-label="Edit task category"
-                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 outline-none focus:border-teal-500"
-                      >
-                        <option value="">No category</option>
-                        <option value="Personal">Personal</option>
-                        <option value="Learning">Learning</option>
-                        <option value="Work">Work</option>
-                        <option value="Development">Development</option>
-                      </select>
-                    </div>
+                        <p className="mt-1 text-right text-xs text-slate-400">
+                          {editedTitle.length}/100
+                        </p>
+                      </div>
 
-                    <div>
-                      <label className="mb-1 block text-xs font-medium text-slate-600">
-                        Priority (optional)
-                      </label>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div className="min-w-0">
+                          <label
+                            htmlFor={`task-category-${task.id}`}
+                            className="mb-1.5 block text-xs font-semibold text-slate-600"
+                          >
+                            Category
+                          </label>
 
-                      <select
-                        value={editedPriority}
-                        onChange={(event) =>
-                          setEditedPriority(event.target.value)
-                        }
-                        aria-label="Edit task priority"
-                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 outline-none focus:border-teal-500"
-                      >
-                        <option value="">No priority</option>
-                        <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High">High</option>
-                      </select>
-                    </div>
+                          <select
+                            id={`task-category-${task.id}`}
+                            value={editedCategory}
+                            onChange={(event) =>
+                              setEditedCategory(event.target.value)
+                            }
+                            className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                          >
+                            <option value="">No category</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Learning">Learning</option>
+                            <option value="Work">Work</option>
+                            <option value="Development">Development</option>
+                          </select>
+                        </div>
 
-                    <div>
-                      <label className="mb-1 block text-xs font-medium text-slate-600">
-                        Due Date (optional)
-                      </label>
+                        <div className="min-w-0">
+                          <label
+                            htmlFor={`task-priority-${task.id}`}
+                            className="mb-1.5 block text-xs font-semibold text-slate-600"
+                          >
+                            Priority
+                          </label>
 
-                      <input
-                        type="date"
-                        value={editedDueDate}
-                        onChange={(event) =>
-                          setEditedDueDate(event.target.value)
-                        }
-                        aria-label="Edit task due date"
-                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 outline-none focus:border-teal-500"
-                      />
+                          <select
+                            id={`task-priority-${task.id}`}
+                            value={editedPriority}
+                            onChange={(event) =>
+                              setEditedPriority(event.target.value)
+                            }
+                            className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                          >
+                            <option value="">No priority</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                          </select>
+                        </div>
+                      </div>
 
-                      {editedDueDate && (
+                      <div>
+                        <label
+                          htmlFor={`task-due-${task.id}`}
+                          className="mb-1.5 block text-xs font-semibold text-slate-600"
+                        >
+                          Due date
+                        </label>
+
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          <input
+                            id={`task-due-${task.id}`}
+                            type="date"
+                            value={editedDueDate}
+                            onChange={(event) =>
+                              setEditedDueDate(event.target.value)
+                            }
+                            className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                          />
+
+                          {editedDueDate && (
+                            <button
+                              type="button"
+                              onClick={() => setEditedDueDate('')}
+                              className="rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+                            >
+                              Clear date
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
                         <button
                           type="button"
-                          onClick={() => setEditedDueDate('')}
-                          className="mt-1 text-xs font-medium text-slate-500 hover:text-red-600"
+                          onClick={() => saveEdit(task.id)}
+                          className="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 sm:flex-none"
                         >
-                          Clear date
+                          <Save size={16} />
+                          Save changes
                         </button>
-                      )}
+
+                        <button
+                          type="button"
+                          onClick={cancelEdit}
+                          className="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 sm:flex-none"
+                        >
+                          <X size={16} />
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex min-w-0 items-center gap-2.5">
-                      <span
-                        className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${taskIconStyle}`}
-                        aria-hidden="true"
-                      >
-                        <TaskIcon size={18} strokeWidth={1.9} />
-                      </span>
-                      <p
-                        className={`min-w-0 break-words font-medium ${
-                          task.completed
-                            ? 'text-slate-400 line-through'
-                            : 'text-slate-800'
-                        }`}
-                      >
-                        {task.title}
-                      </p>
-                    </div>
+                  ) : (
+                    <>
+                      <div className="flex min-w-0 items-start gap-2.5">
+                        <span
+                          className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${taskIconStyle}`}
+                          aria-hidden="true"
+                        >
+                          <TaskIcon size={18} strokeWidth={1.9} />
+                        </span>
 
-                    {(task.category || task.priority || task.dueDate) && (
-                      <div className="flex flex-wrap items-center gap-2">
-                        {task.category && (
-                          <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-700">
-                            {task.category}
-                          </span>
-                        )}
-
-                        {task.priority && (
-                          <span
-                            className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getPriorityStyle(
-                              task.priority,
-                            )}`}
-                          >
-                            {task.priority} Priority
-                          </span>
-                        )}
-
-                        {task.dueDate && (
-                          <span
-                            className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                              overdue
-                                ? 'bg-red-100 text-red-700'
-                                : 'bg-slate-100 text-slate-600'
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className={`break-words text-sm font-semibold leading-6 sm:text-base ${
+                              task.completed
+                                ? 'text-slate-400 line-through'
+                                : 'text-slate-800'
                             }`}
                           >
-                            {overdue
-                              ? `Overdue: ${formatDueDate(task.dueDate)}`
-                              : `Due: ${formatDueDate(task.dueDate)}`}
-                          </span>
-                        )}
+                            {task.title}
+                          </p>
+
+                          {task.completed && (
+                            <span className="mt-1 inline-block text-xs font-medium text-teal-700">
+                              Completed
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </>
-                )}
+
+                      {(task.category || task.priority || task.dueDate) && (
+                        <div className="mt-3 flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
+                          {task.category && (
+                            <span className="max-w-full break-words rounded-full bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-700">
+                              {task.category}
+                            </span>
+                          )}
+
+                          {task.priority && (
+                            <span
+                              className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getPriorityStyle(
+                                task.priority,
+                              )}`}
+                            >
+                              {task.priority} Priority
+                            </span>
+                          )}
+
+                          {task.dueDate && (
+                            <span
+                              className={`inline-flex max-w-full items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
+                                overdue
+                                  ? 'bg-red-100 text-red-700'
+                                  : 'bg-slate-100 text-slate-600'
+                              }`}
+                            >
+                              <CalendarClock size={13} className="shrink-0" />
+                              <span className="break-words">
+                                {overdue ? 'Overdue: ' : 'Due: '}
+                                {formatDueDate(task.dueDate)}
+                              </span>
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
 
-              <div className="flex shrink-0 flex-wrap items-center gap-2">
-                {editingId === task.id ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => saveEdit(task.id)}
-                      className="rounded-lg px-3 py-2 text-sm font-medium text-teal-700 transition hover:bg-teal-50"
-                    >
-                      Save
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={cancelEdit}
-                      className="rounded-lg px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-100"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
+              {!isEditing && (
+                <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-slate-100 pt-3 sm:mt-2">
                   <button
                     type="button"
                     onClick={() => startEditing(task)}
-                    className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
+                    aria-label={`Edit ${task.title}`}
+                    className="inline-flex min-h-10 min-w-20 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
                   >
+                    <Pencil size={15} />
                     Edit
                   </button>
-                )}
 
-                <button
-                  type="button"
-                  onClick={() => confirmDelete(task)}
-                  aria-label={`Delete ${task.title}`}
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+                  <button
+                    type="button"
+                    onClick={() => confirmDelete(task)}
+                    aria-label={`Delete ${task.title}`}
+                    className="inline-flex min-h-10 min-w-20 items-center justify-center gap-1.5 rounded-xl border border-red-100 px-3 py-2 text-sm font-semibold text-red-600 transition hover:border-red-200 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200"
+                  >
+                    <Trash2 size={15} />
+                    Delete
+                  </button>
+                </div>
+              )}
+            </article>
           )
         })
       )}
