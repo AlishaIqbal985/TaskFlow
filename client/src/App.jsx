@@ -581,7 +581,7 @@ async function toggleTask(id) {
       title: "Task status not saved",
       message:
         error.response?.data?.message ||
-        "Task status update nahi hua. Backend connection check karo.",
+        "Task status could not be updated. Please check your internet connection and try again.",
     });
   }
 }
