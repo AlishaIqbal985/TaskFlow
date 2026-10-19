@@ -255,8 +255,8 @@ function Auth({ onAuthenticated }) {
   }[mode];
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
-      <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl md:grid-cols-2">
+    <main className="flex min-h-screen w-full items-start justify-center bg-slate-50 px-3 py-5 sm:items-center sm:px-5 sm:py-8 md:px-6">
+      <div className="grid w-full min-w-0 max-w-5xl grid-cols-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl sm:rounded-3xl md:grid-cols-2">
         <section className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-950 via-teal-950 to-emerald-800 p-10 text-white md:flex">
           <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-teal-400/20 blur-3xl" />
           <div className="absolute -bottom-20 -left-16 h-64 w-64 rounded-full bg-emerald-300/20 blur-3xl" />
@@ -297,7 +297,7 @@ function Auth({ onAuthenticated }) {
           </div>
         </section>
 
-        <section className="p-6 sm:p-10 lg:p-12">
+        <section className="min-w-0 p-5 sm:p-8 md:p-10 lg:p-12">
           <div className="mb-8 flex items-center gap-3 md:hidden">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-600 text-white">
               <ListTodo size={24} />
