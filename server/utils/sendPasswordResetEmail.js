@@ -58,10 +58,12 @@ This link expires in 15 minutes. If you did not request this, you can ignore thi
     `,
   });
 
-  if (error) {
-    console.error("Password reset email failed:", error.message);
-    throw new Error("Unable to send password reset email.");
-  }
+ if (error) {
+  console.error("Resend API error details:", JSON.stringify(error));
+  throw new Error(
+    error.message || "Unable to send password reset email."
+  );
+}
 
   return data;
 }
