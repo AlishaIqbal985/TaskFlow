@@ -32,17 +32,18 @@ function DueDatePicker({ value, onChange }) {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full z-40 mt-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
-          <DayPicker
-            mode="single"
-            selected={selectedDate}
-            onSelect={(date) => {
-              onChange(date ? format(date, 'yyyy-MM-dd') : '')
-              setIsOpen(false)
-            }}
-            disabled={{ before: new Date() }}
-            showOutsideDays
-          />
+        <div className="absolute left-0 top-full z-40 mt-2 w-max max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-2 shadow-xl sm:p-3">
+         <DayPicker
+  mode="single"
+  selected={selectedDate}
+  onSelect={(date) => {
+    onChange(date ? format(date, 'yyyy-MM-dd') : '')
+    setIsOpen(false)
+  }}
+  disabled={{ before: new Date() }}
+  showOutsideDays
+  className="max-w-full"
+/>
 
           <button
             type="button"
